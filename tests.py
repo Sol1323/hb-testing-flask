@@ -16,18 +16,17 @@ class PartyTests(unittest.TestCase):
         self.assertIn(b"board games, rainbows, and ice cream sundaes", result.data)
 
     def test_no_rsvp_yet(self):
-        # FIXME: Add a test to show we see the RSVP form, but NOT the
-        # party details
-        print("FIXME")
+
+        result = self.client.get('/')
+        self.assertIn(b'<h2>Please RSVP</h2>', result.data)
 
     def test_rsvp(self):
         result = self.client.post("/rsvp",
                                   data={"name": "Jane",
                                         "email": "jane@jane.com"},
                                   follow_redirects=True)
-        # FIXME: Once we RSVP, we should see the party details, but
-        # not the RSVP form
-        print("FIXME")
+
+        self.assertIn(b"<h2>Party Details</h2>", result.data)
 
 
 class PartyTestsDatabase(unittest.TestCase):
@@ -38,6 +37,11 @@ class PartyTestsDatabase(unittest.TestCase):
 
         self.client = app.test_client()
         app.config['TESTING'] = True
+
+        def connect_to_db(app, db_uri="postgresql:///games"):
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+    db.app = app
+    db.init_app(app)
 
         # Connect to test database (uncomment when testing database)
         # connect_to_db(app, "postgresql:///testdb")
